@@ -147,6 +147,9 @@
                         <button id="downloadBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
                             <i data-lucide="download" class="w-3 h-3"></i> <span data-i18n="download">.md</span>
                         </button>
+                        <button id="clearBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> <span data-i18n="clear">Clear</span>
+                        </button>
                     </div>
                 </div>
                 <div id="articleBody" class="text-theme-primary text-base leading-relaxed whitespace-pre-wrap"></div>
@@ -201,6 +204,8 @@
                 copy: 'Copy',
                 copied: 'Copied!',
                 download: '.md',
+                clear: 'Clear',
+                cleared: 'Cleared.',
                 rec: 'REC',
                 clickToStart: 'Click to start speaking',
                 clickToStop: 'Click to stop & generate',
@@ -235,6 +240,8 @@
                 copy: 'Copier',
                 copied: 'Copié !',
                 download: '.md',
+                clear: 'Effacer',
+                cleared: 'Effacé.',
                 rec: 'ENR',
                 clickToStart: 'Cliquez pour parler',
                 clickToStop: 'Cliquez pour arrêter & générer',
@@ -269,6 +276,8 @@
                 copy: 'Copiar',
                 copied: '¡Copiado!',
                 download: '.md',
+                clear: 'Limpiar',
+                cleared: 'Limpiado.',
                 rec: 'GRB',
                 clickToStart: 'Haga clic para hablar',
                 clickToStop: 'Haga clic para detener y generar',
@@ -303,6 +312,8 @@
                 copy: 'نسخ',
                 copied: 'تم النسخ!',
                 download: '.md',
+                clear: 'مسح',
+                cleared: 'تم المسح.',
                 rec: 'تسجيل',
                 clickToStart: 'انقر لبدء التحدث',
                 clickToStop: 'انقر للإيقاف والإنشاء',
@@ -590,6 +601,23 @@
                 lucide.createIcons();
             }, 2000);
         });
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (isRecording) stopRecording();
+            if (restartTimer) clearTimeout(restartTimer);
+            finalTranscript = '';
+            processedResultsCount = 0;
+            liveTranscriptText.innerText = '';
+            liveTranscriptCard.classList.add('hidden');
+            resultWorkspace.classList.add('hidden');
+            generatedTitle.innerText = '';
+            articleBody.innerText = '';
+            questionsList.innerHTML = '';
+            questionsCard.classList.add('hidden');
+            transcriptPreview.classList.add('hidden');
+            statusMsg.textContent = t('cleared');
+            statusMsg.dataset.i18n = 'cleared';
+        });
+
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const title = generatedTitle.innerText || 'VoiceForge';
             const text = articleBody.innerText;
