@@ -36,10 +36,18 @@ Built **VoiceForge** from scratch — a free Speech-to-Article web app with:
    - Clear button also resets all state
 10. **Bug fixes (v3 — final):**
     - `display: none/block` instead of CSS class toggles for mic/stop icons — stop button now reliably visible
-    - Instance ID guard (`recInstance`) prevents stale timeouts from interfering after stop/restart
-    - 200ms restart delay with fresh `SpeechRecognition` object on every `onend`
-    - `finalTranscript` rebuilt from `e.results` on every `onresult` — no appending, no accumulation
-    - All `onerror` paths call `stopRecording()` for clean teardown
+     - Instance ID guard (`recInstance`) prevents stale timeouts from interfering after stop/restart
+     - 200ms restart delay with fresh `SpeechRecognition` object on every `onend`
+     - `finalTranscript` rebuilt from `e.results` on every `onresult` — no appending, no accumulation
+     - All `onerror` paths call `stopRecording()` for clean teardown
+ 11. **Refactor (v4 — session 2026-07-11):**
+     - Extracted `setRecordingUI()` and `createRecognitionInstance()` for cleaner start/stop
+     - `addFinalSegment()` with `committedSegments` array — dedup by comparing new segment to last; replaces if extended, drops if exact repeat or shorter
+     - `normalizeForCompare()` for normalized string comparison (trim + lowercase + collapse whitespace)
+     - `isEngineRunning` flag + `restartTimer` — prevents stale restarts after stop
+     - `processedResultsCount` tracks which `e.results` indices have been committed
+     - `lucide.createIcons()` called **once** at init — SVGs toggled via `hidden` class (no re-create, no display style loss)
+     - "Reconnecting..." status message shown during engine restart gap
 
 
 ### Deployments
