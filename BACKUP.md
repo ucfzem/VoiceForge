@@ -48,6 +48,10 @@ Built **VoiceForge** from scratch — a free Speech-to-Article web app with:
      - `processedResultsCount` tracks which `e.results` indices have been committed
      - `lucide.createIcons()` called **once** at init — SVGs toggled via `hidden` class (no re-create, no display style loss)
      - "Reconnecting..." status message shown during engine restart gap
+ 12. **Bug fixes (v5 — session 2026-07-11, later):**
+     - `setRecordingUI` now queries `document.getElementById()` directly instead of using stale variable references (fixes stop button not appearing on Android)
+     - `onend` restart creates a **fresh** `SpeechRecognition` instance via `createRecognitionInstance()` instead of reusing the ended one that silently fails on `.start()`
+     - Restart delay reduced from 300ms → 50ms, "Reconnecting..." message removed for seamless restart
 
 
 ### Deployments
