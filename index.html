@@ -515,8 +515,6 @@
             rec.onend = () => {
                 isEngineRunning = false;
                 if (!isRecording) return;
-                statusMsg.textContent = t('reconnecting');
-                statusMsg.dataset.i18n = 'reconnecting';
                 clearTimeout(restartTimer);
                 restartTimer = setTimeout(() => {
                     if (!isRecording || isEngineRunning) return;
@@ -527,7 +525,7 @@
                     } catch (err) {
                         console.error('Restart failed:', err);
                     }
-                }, 300);
+                }, 50);
             };
             return rec;
         }
