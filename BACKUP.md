@@ -28,6 +28,12 @@ Built **VoiceForge** from scratch — a free Speech-to-Article web app with:
 7. Dark/Light theme toggle (moon/sun icons)
    - Dark: brown/gold/yellow/white
    - Light: beige/brown/gold
+8. Clear button (trash icon) to reset transcript/article
+9. **Bug fixes (v2):**
+   - Rebuild transcript from `e.results` on every event — eliminates duplicate text
+   - Fresh `SpeechRecognition` object on each restart — old instance was dying after `onend`
+   - `lucide.createIcons()` after toggling button icons — ensures stop icon renders
+   - Clear button also resets all state
 
 
 ### Deployments
