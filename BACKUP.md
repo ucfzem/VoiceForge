@@ -35,6 +35,7 @@ Built **VoiceForge** from scratch — a free Speech-to-Article web app with:
 |---|---|---|
 | **EchoVault** (original) | https://echovault-zeta.vercel.app | https://github.com/ucfzem/EchoVault |
 | **VoiceForge** (new) | https://voiceforge-delta.vercel.app | https://github.com/ucfzem/VoiceForge |
+| **UcfZem Works** (link tree) | https://ucfzem.github.io/works/ | https://github.com/ucfzem/ucfzem.github.io |
 
 ### File Structure
 ```
@@ -44,6 +45,11 @@ echovault2/
 ├── vercel.json     — Vercel config
 └── BACKUP.md       — This file
 ```
+
+### VoiceForge added to Link Tree
+- Located at https://ucfzem.github.io/works/ in the **locked projects** section (password-protected)
+- Positioned in the middle: between "AI Image Enhancer" and "4lang Quiz"
+- Icon: 🎙️ (microphone)
 
 ### How to Use VoiceForge
 1. Open https://voiceforge-delta.vercel.app
