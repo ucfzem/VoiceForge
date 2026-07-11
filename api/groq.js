@@ -1,4 +1,4 @@
-const SYSTEM_PROMPT = `You are a precise knowledge-base synthesizer. Turn a messy speech transcript into a clean, perfectly structured article.
+const BASE_PROMPT = `You are a precise knowledge-base synthesizer. Turn a messy speech transcript into a clean, perfectly structured article.
 
 CRITICAL RULES:
 1. Preserve the speaker's exact thoughts, meanings, data points, and viewpoints.
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { transcript, apiKey } = req.body;
+  const { transcript, apiKey, language } = req.body;
 
   if (!apiKey || !apiKey.startsWith('gsk_')) {
     return res.status(400).json({ error: 'Valid Groq API key (gsk_...) is required' });
@@ -30,6 +30,8 @@ export default async function handler(req, res) {
   if (!transcript || transcript.trim().length < 5) {
     return res.status(400).json({ error: 'Transcript is too short or empty' });
   }
+
+  const systemPrompt = `${BASE_PROMPT}\n\nThe user spoke in language code: ${language || 'en-US'}. Write the title, article, and questions in the same language as the transcript. If you cannot determine the language, use the language code provided.`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -41,7 +43,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: transcript }
         ],
         temperature: 0.2,

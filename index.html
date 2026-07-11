@@ -74,6 +74,24 @@
             </div>
         </details>
 
+        <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
+            <label class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i> Language
+            </label>
+            <select id="langSelect" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <option value="en-US">🇺🇸 English (US)</option>
+                <option value="ar-SA">🇸🇦 العربية (Arabic)</option>
+                <option value="fr-FR">🇫🇷 Français (French)</option>
+                <option value="es-ES">🇪🇸 Español (Spanish)</option>
+                <option value="de-DE">🇩🇪 Deutsch (German)</option>
+                <option value="hi-IN">🇮🇳 हिन्दी (Hindi)</option>
+                <option value="pt-BR">🇧🇷 Português (Brazil)</option>
+                <option value="ja-JP">🇯🇵 日本語 (Japanese)</option>
+                <option value="zh-CN">🇨🇳 中文 (Chinese)</option>
+                <option value="ru-RU">🇷🇺 Русский (Russian)</option>
+            </select>
+        </div>
+
         <div class="text-center py-4">
             <p id="statusMessage" class="text-slate-400 text-base font-medium">Enter your Groq key, then click the mic and start speaking.</p>
             <p id="transcriptPreview" class="text-slate-500 text-sm mt-3 hidden italic">Speaking detected...</p>
@@ -204,7 +222,7 @@
             recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            recognition.lang = document.getElementById('langSelect').value;
 
             recognition.onresult = (e) => {
                 let interim = '';
@@ -286,7 +304,7 @@
                 const res = await fetch('/api/groq', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ transcript: text, apiKey: key })
+                    body: JSON.stringify({ transcript: text, apiKey: key, language: document.getElementById('langSelect').value })
                 });
 
                 if (!res.ok) {
