@@ -520,9 +520,9 @@
             try {
                 recognition.start();
                 isRecording = true;
+                lucide.createIcons();
                 micIcon.style.display = 'none';
                 stopIcon.style.display = 'inline-block';
-                lucide.createIcons();
                 recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
                 recordBtn.style.background = 'var(--danger)';
                 recordBtn.classList.add('pulse-ring');
@@ -541,9 +541,9 @@
                 try { recognition.stop(); } catch (e) {}
                 recognition = null;
             }
+            lucide.createIcons();
             micIcon.style.display = 'inline-block';
             stopIcon.style.display = 'none';
-            lucide.createIcons();
             recordBtn.style.background = '';
             recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
             recordBtn.classList.remove('pulse-ring');
