@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!DOCTYPE html><html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,7 +8,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; transition: background .3s, color .3s; }
-
         :root {
             --bg-primary: #1a1410;
             --bg-secondary: #231a14;
@@ -44,7 +42,6 @@
             --danger-hover: #b91c1c;
             --success: #65a30d;
         }
-
         body { background: var(--bg-primary); color: var(--text-primary); }
         .bg-theme-primary { background: var(--bg-primary); }
         .bg-theme-secondary { background: var(--bg-secondary); }
@@ -60,7 +57,6 @@
         .hover\:bg-accent-hover:hover { background: var(--accent-hover); }
         .shadow-glow { box-shadow: 0 0 30px var(--glow); }
         .border-accent { border-color: var(--accent); }
-
         .pulse-ring { animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
         @keyframes pulse-ring {
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
@@ -72,7 +68,6 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-secondary); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-
         [dir="rtl"] { text-align: right; }
         [dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
         [dir="rtl"] .mr-2 { margin-right: 0; margin-left: .5rem; }
@@ -84,7 +79,6 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-accent-dim">
-
     <header class="border-b border-theme bg-theme-primary/80 backdrop-blur sticky top-0 z-50 transition-colors">
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -105,9 +99,7 @@
             </div>
         </div>
     </header>
-
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-5 flex flex-col gap-5 custom-scrollbar overflow-y-auto">
-
         <details class="bg-theme-card border border-theme rounded-xl p-4 group transition-colors" open>
             <summary class="list-none flex items-center justify-between cursor-pointer font-semibold text-sm text-theme-secondary select-none">
                 <div class="flex items-center gap-2">
@@ -134,20 +126,16 @@
                 </div>
             </div>
         </details>
-
         <div class="text-center py-3">
             <p id="statusMessage" class="text-theme-secondary text-sm font-medium" data-i18n="statusDefault">Enter your Groq key, select language, then click the mic and start speaking.</p>
             <p id="transcriptPreview" class="text-theme-muted text-xs mt-2 hidden italic"></p>
         </div>
-
         <div id="loaderView" class="hidden flex flex-col items-center justify-center py-10 gap-4">
             <div class="w-10 h-10 border-4 rounded-full animate-spin" style="border-color:var(--accent-dim);border-top-color:var(--accent)"></div>
             <p class="text-sm text-theme-muted font-medium" data-i18n="structuring">Structuring your ideas into a polished article...</p>
         </div>
-
         <div id="resultWorkspace" class="hidden flex flex-col gap-5 fade-in">
             <h2 id="generatedTitle" class="text-2xl font-extrabold text-theme-primary tracking-tight"></h2>
-
             <div class="bg-theme-card border border-theme rounded-xl p-5 shadow-glow transition-colors">
                 <div class="flex items-center gap-2 mb-3 border-b border-theme pb-3" style="color:var(--success)">
                     <i data-lucide="file-text" class="w-5 h-5"></i>
@@ -163,7 +151,6 @@
                 </div>
                 <div id="articleBody" class="text-theme-primary text-base leading-relaxed whitespace-pre-wrap"></div>
             </div>
-
             <div id="questionsCard" class="hidden bg-accent-dim border border-theme rounded-xl p-5 transition-colors">
                 <div class="flex items-center gap-2 mb-3" style="color:var(--accent)">
                     <i data-lucide="help-circle" class="w-5 h-5"></i>
@@ -172,7 +159,6 @@
                 <div id="questionsList" class="flex flex-col gap-3"></div>
             </div>
         </div>
-
         <div id="liveTranscriptCard" class="hidden bg-theme-card border border-theme rounded-xl p-5 transition-colors">
             <div class="flex items-center gap-2 mb-3 text-accent">
                 <i data-lucide="text" class="w-5 h-5"></i>
@@ -183,9 +169,7 @@
             </div>
             <div id="liveTranscriptText" class="text-theme-secondary text-sm leading-relaxed min-h-[50px]"></div>
         </div>
-
     </main>
-
     <footer class="bg-theme-primary border-t border-theme py-5 px-4 shrink-0 transition-colors">
         <div class="max-w-4xl mx-auto flex flex-col items-center gap-2">
             <button id="recordBtn" type="button"
@@ -196,10 +180,8 @@
             <p id="actionText" class="text-xs font-semibold text-theme-muted tracking-wide uppercase" data-i18n="clickToStart">Click to start speaking</p>
         </div>
     </footer>
-
     <script>
         lucide.createIcons();
-
         const TRANSLATIONS = {
             en: {
                 configTitle: 'Configure Groq API Key',
@@ -233,6 +215,7 @@
                 noKeySave: 'Enter a valid Groq key (starts with gsk_) before saving.',
                 speakFreely: 'Speak freely — your words are being transcribed in real time.',
                 recordingStopped: 'Recording stopped — Groq key required.',
+                reconnecting: 'Reconnecting mic...',
             },
             fr: {
                 configTitle: 'Configurer la clé API Groq',
@@ -266,6 +249,7 @@
                 noKeySave: 'Entrez une clé Groq valide (commence par gsk_) avant d\'enregistrer.',
                 speakFreely: 'Parlez librement — vos mots sont transcrits en temps réel.',
                 recordingStopped: 'Enregistrement arrêté — clé Groq requise.',
+                reconnecting: 'Reconnexion du micro...',
             },
             es: {
                 configTitle: 'Configurar la clave API de Groq',
@@ -299,6 +283,7 @@
                 noKeySave: 'Ingrese una clave Groq válida (empieza con gsk_) antes de guardar.',
                 speakFreely: 'Hable libremente — sus palabras se transcriben en tiempo real.',
                 recordingStopped: 'Grabación detenida — se requiere clave Groq.',
+                reconnecting: 'Reconectando micrófono...',
             },
             ar: {
                 configTitle: 'تكوين مفتاح API لـ Groq',
@@ -332,11 +317,10 @@
                 noKeySave: 'أدخل مفتاح Groq صالح (يبدأ بـ gsk_) قبل الحفظ.',
                 speakFreely: 'تحدث بحرية — يتم نسخ كلماتك في الوقت الفعلي.',
                 recordingStopped: 'تم إيقاف التسجيل — مفتاح Groq مطلوب.',
+                reconnecting: 'إعادة الاتصال بالميكروفون...',
             }
         };
-
         const RECOGNITION_LOCALE = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', ar: 'ar-SA' };
-
         const themeToggle = document.getElementById('themeToggle');
         const moonIcon = document.getElementById('moonIcon');
         const sunIcon = document.getElementById('sunIcon');
@@ -358,17 +342,16 @@
         const actionText = document.getElementById('actionText');
         const liveTranscriptCard = document.getElementById('liveTranscriptCard');
         const liveTranscriptText = document.getElementById('liveTranscriptText');
-
         let recognition = null;
         let isRecording = false;
+        let isEngineRunning = false;
+        let restartTimer = null;
         let finalTranscript = '';
+        let processedResultsCount = 0;
         let currentLang = 'en';
         let currentTheme = 'dark';
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
         function t(key) { return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS.en[key] || key; }
-
         function translateUI() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.dataset.i18n;
@@ -394,7 +377,6 @@
             }
             lucide.createIcons();
         }
-
         function setTheme(theme) {
             currentTheme = theme;
             document.documentElement.classList.toggle('light', theme === 'light');
@@ -402,7 +384,6 @@
             sunIcon.classList.toggle('hidden', theme === 'dark');
             localStorage.setItem('voiceforge_theme', theme);
         }
-
         function setLang(locale) {
             currentLang = locale;
             const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -411,19 +392,15 @@
             localStorage.setItem('voiceforge_lang', locale);
             translateUI();
         }
-
         const savedTheme = localStorage.getItem('voiceforge_theme') || 'dark';
         setTheme(savedTheme);
         const savedLang = localStorage.getItem('voiceforge_lang') || 'en';
         langSelect.value = savedLang;
         setLang(savedLang);
-
         themeToggle.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
         langSelect.addEventListener('change', () => setLang(langSelect.value));
-
         const savedKey = localStorage.getItem('voiceforge_groq_key');
         if (savedKey) groqKeyInput.value = savedKey;
-
         function saveKey() {
             const key = groqKeyInput.value.trim();
             if (key.startsWith('gsk_')) {
@@ -437,7 +414,6 @@
         }
         saveKeyBtn.addEventListener('click', saveKey);
         groqKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveKey(); });
-
         function checkKey() {
             const hasKey = groqKeyInput.value.trim().startsWith('gsk_');
             if (!hasKey && isRecording) {
@@ -447,7 +423,73 @@
             }
         }
         groqKeyInput.addEventListener('input', checkKey);
-
+        function setRecordingUI(recording) {
+            micIcon.classList.toggle('hidden', recording);
+            stopIcon.classList.toggle('hidden', !recording);
+            if (recording) {
+                recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
+                recordBtn.style.background = 'var(--danger)';
+                recordBtn.classList.add('pulse-ring');
+                actionText.textContent = t('clickToStop');
+            } else {
+                recordBtn.style.background = '';
+                recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
+                recordBtn.classList.remove('pulse-ring');
+                actionText.textContent = t('clickToStart');
+            }
+        }
+        function createRecognitionInstance() {
+            const rec = new SpeechRecognition();
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+            rec.onstart = () => {
+                isEngineRunning = true;
+                processedResultsCount = 0;
+            };
+            rec.onresult = (e) => {
+                let interim = '';
+                for (let i = 0; i < e.results.length; i++) {
+                    const r = e.results[i];
+                    if (r.isFinal) {
+                        if (i >= processedResultsCount) {
+                            finalTranscript += r[0].transcript + ' ';
+                            processedResultsCount = i + 1;
+                        }
+                    } else {
+                        interim += r[0].transcript;
+                    }
+                }
+                const display = finalTranscript + interim;
+                liveTranscriptText.innerText = display || '...';
+                transcriptPreview.classList.remove('hidden');
+                transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
+            };
+            rec.onerror = (e) => {
+                console.error('Speech error:', e.error);
+                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                    alert(t('micDenied'));
+                    stopRecording();
+                } else if (e.error === 'audio-capture') {
+                    alert(t('micError') + ' ' + e.error);
+                    stopRecording();
+                }
+            };
+            rec.onend = () => {
+                isEngineRunning = false;
+                if (!isRecording) return;
+                clearTimeout(restartTimer);
+                restartTimer = setTimeout(() => {
+                    if (!isRecording || isEngineRunning) return;
+                    try {
+                        recognition.start();
+                    } catch (err) {
+                        console.error('Restart failed:', err);
+                    }
+                }, 300);
+            };
+            return rec;
+        }
         function startRecording() {
             const key = groqKeyInput.value.trim();
             if (!key || !key.startsWith('gsk_')) {
@@ -458,84 +500,36 @@
                 alert(t('notSupported'));
                 return;
             }
-
             finalTranscript = '';
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-
-            recognition.onresult = (e) => {
-                let interim = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    const r = e.results[i];
-                    if (r.isFinal) {
-                        finalTranscript += r[0].transcript + ' ';
-                    } else {
-                        interim += r[0].transcript;
-                    }
-                }
-                const display = finalTranscript + interim;
-                liveTranscriptText.innerText = display || '...';
-                transcriptPreview.classList.remove('hidden');
-                transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
-            };
-
-            recognition.onerror = (e) => {
-                console.error('Speech error:', e.error);
-                if (e.error === 'not-allowed') {
-                    alert(t('micDenied'));
-                }
-                stopRecording();
-            };
-
-            recognition.onend = () => {
-                if (isRecording) {
-                    try { recognition.start(); } catch (e) {}
-                }
-            };
-
+            processedResultsCount = 0;
+            recognition = createRecognitionInstance();
             try {
                 recognition.start();
                 isRecording = true;
                 liveTranscriptCard.classList.remove('hidden');
                 liveTranscriptText.innerText = t('listening');
-                micIcon.classList.add('hidden');
-                stopIcon.classList.remove('hidden');
-                recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
-                recordBtn.style.background = 'var(--danger)';
-                recordBtn.classList.add('pulse-ring');
-                actionText.textContent = t('clickToStop');
+                setRecordingUI(true);
                 statusMsg.textContent = t('speakFreely');
                 statusMsg.dataset.i18n = 'speakFreely';
             } catch (err) {
                 alert(t('micError') + ' ' + err.message);
             }
         }
-
         function stopRecording() {
+            isRecording = false;
+            clearTimeout(restartTimer);
             if (recognition) {
                 try { recognition.stop(); } catch (e) {}
-                recognition = null;
             }
-            isRecording = false;
-            micIcon.classList.remove('hidden');
-            stopIcon.classList.add('hidden');
-            recordBtn.style.background = '';
-            recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
-            recordBtn.classList.remove('pulse-ring');
-            actionText.textContent = t('clickToStart');
-
+            setRecordingUI(false);
             if (finalTranscript.trim().length < 10) {
                 statusMsg.textContent = t('notEnough');
                 statusMsg.dataset.i18n = 'notEnough';
                 liveTranscriptCard.classList.add('hidden');
                 return;
             }
-
             callGroq(finalTranscript.trim());
         }
-
         async function callGroq(text) {
             const key = groqKeyInput.value.trim();
             loaderView.classList.remove('hidden');
@@ -543,24 +537,19 @@
             liveTranscriptCard.classList.add('hidden');
             statusMsg.textContent = t('structuring');
             statusMsg.dataset.i18n = 'structuring';
-
             try {
                 const res = await fetch('/api/groq', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ transcript: text, apiKey: key, language: RECOGNITION_LOCALE[currentLang] || 'en-US' })
                 });
-
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({ error: res.statusText }));
                     throw new Error(err.error || `HTTP ${res.status}`);
                 }
-
                 const payload = await res.json();
                 generatedTitle.innerText = payload.title || 'VoiceForge';
-
                 articleBody.innerText = payload.cleanArticle;
-
                 questionsList.innerHTML = '';
                 if (payload.questions && payload.questions.length > 0) {
                     payload.questions.forEach(q => {
@@ -574,7 +563,6 @@
                 } else {
                     questionsCard.classList.add('hidden');
                 }
-
                 resultWorkspace.classList.remove('hidden');
                 statusMsg.textContent = t('generated');
                 statusMsg.dataset.i18n = 'generated';
@@ -587,11 +575,9 @@
                 loaderView.classList.add('hidden');
             }
         }
-
         recordBtn.addEventListener('click', () => {
             isRecording ? stopRecording() : startRecording();
         });
-
         document.getElementById('copyBtn').addEventListener('click', async () => {
             const text = articleBody.innerText;
             if (!text) return;
@@ -604,7 +590,6 @@
                 lucide.createIcons();
             }, 2000);
         });
-
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const title = generatedTitle.innerText || 'VoiceForge';
             const text = articleBody.innerText;
@@ -617,7 +602,6 @@
             a.click();
             URL.revokeObjectURL(url);
         });
-
         lucide.createIcons();
     </script>
 </body>
