@@ -356,6 +356,7 @@
         let recognition = null;
         let isRecording = false;
         let finalTranscript = '';
+        let recInstance = 0;
         let currentLang = 'en';
         let currentTheme = 'dark';
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -431,67 +432,7 @@
             }
         }
         groqKeyInput.addEventListener('input', checkKey);
-        function setRecordingUI(recording) {
-            micIcon.classList.toggle('hidden', recording);
-            stopIcon.classList.toggle('hidden', !recording);
-            if (recording) {
-                recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
-                recordBtn.style.background = 'var(--danger)';
-                recordBtn.classList.add('pulse-ring');
-                actionText.textContent = t('clickToStop');
-            } else {
-                recordBtn.style.background = '';
-                recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
-                recordBtn.classList.remove('pulse-ring');
-                actionText.textContent = t('clickToStart');
-            }
-            lucide.createIcons();
-        }
-        function attachHandlers(rec) {
-            rec.onresult = (e) => {
-                let interim = '';
-                finalTranscript = '';
-                for (let i = 0; i < e.results.length; i++) {
-                    const r = e.results[i];
-                    if (r.isFinal) {
-                        finalTranscript += r[0].transcript + ' ';
-                    } else {
-                        interim += r[0].transcript;
-                    }
-                }
-                const display = finalTranscript + interim;
-                liveTranscriptText.innerText = display || '...';
-                transcriptPreview.classList.remove('hidden');
-                transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
-            };
-            rec.onerror = (e) => {
-                console.error('Speech error:', e.error);
-                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-                    alert(t('micDenied'));
-                    stopRecording();
-                } else if (e.error === 'audio-capture') {
-                    alert(t('micError') + ' ' + e.error);
-                    stopRecording();
-                }
-            };
-            rec.onend = () => {
-                if (!isRecording) return;
-                recognition = null;
-                const fresh = new SpeechRecognition();
-                fresh.continuous = true;
-                fresh.interimResults = true;
-                fresh.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-                attachHandlers(fresh);
-                recognition = fresh;
-                setTimeout(() => {
-                    if (!isRecording) return;
-                    try { fresh.start(); } catch (err) {
-                        console.error('Restart failed:', err);
-                        stopRecording();
-                    }
-                }, 300);
-            };
-        }
+        let seenResults = 0;
         function startRecording() {
             const key = groqKeyInput.value.trim();
             if (!key || !key.startsWith('gsk_')) {
@@ -503,19 +444,93 @@
                 return;
             }
             finalTranscript = '';
+            recInstance++;
+            const myId = recInstance;
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+                recognition = null;
+            }
             recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-            attachHandlers(recognition);
+            recognition.onresult = (e) => {
+                let allText = '';
+                let interim = '';
+                for (let i = 0; i < e.results.length; i++) {
+                    const r = e.results[i];
+                    if (r.isFinal) {
+                        allText += r[0].transcript + ' ';
+                    } else {
+                        interim += r[0].transcript;
+                    }
+                }
+                finalTranscript = allText;
+                liveTranscriptText.innerText = allText + interim;
+                transcriptPreview.classList.remove('hidden');
+                transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
+            };
+            recognition.onerror = (e) => {
+                console.error('Speech error:', e.error);
+                if (e.error === 'not-allowed') { alert(t('micDenied')); }
+                stopRecording();
+            };
+            recognition.onend = () => {
+                if (!isRecording || recInstance !== myId) return;
+                if (recognition) {
+                    try { recognition.stop(); } catch (e) {}
+                    recognition = null;
+                }
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+                recognition.onresult = (e) => {
+                    let allText = '';
+                    let interim = '';
+                    for (let i = 0; i < e.results.length; i++) {
+                        const r = e.results[i];
+                        if (r.isFinal) {
+                            allText += r[0].transcript + ' ';
+                        } else {
+                            interim += r[0].transcript;
+                        }
+                    }
+                    finalTranscript = allText;
+                    liveTranscriptText.innerText = allText + interim;
+                    transcriptPreview.classList.remove('hidden');
+                    transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
+                };
+                recognition.onerror = (e) => {
+                    console.error('Speech error:', e.error);
+                    if (e.error === 'not-allowed') alert(t('micDenied'));
+                    stopRecording();
+                };
+                recognition.onend = () => {
+                    if (isRecording && recInstance === myId) {
+                        setTimeout(() => {
+                            if (isRecording && recognition && recInstance === myId) {
+                                try { recognition.start(); } catch (err) { stopRecording(); }
+                            }
+                        }, 200);
+                    }
+                };
+                try { recognition.start(); } catch (err) { stopRecording(); }
+            };
             try {
                 recognition.start();
                 isRecording = true;
-                liveTranscriptCard.classList.remove('hidden');
-                liveTranscriptText.innerText = t('listening');
-                setRecordingUI(true);
+                micIcon.style.display = 'none';
+                stopIcon.style.display = 'inline-block';
+                lucide.createIcons();
+                recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
+                recordBtn.style.background = 'var(--danger)';
+                recordBtn.classList.add('pulse-ring');
+                actionText.textContent = t('clickToStop');
                 statusMsg.textContent = t('speakFreely');
                 statusMsg.dataset.i18n = 'speakFreely';
+                liveTranscriptCard.classList.remove('hidden');
+                liveTranscriptText.innerText = t('listening');
             } catch (err) {
                 alert(t('micError') + ' ' + err.message);
             }
@@ -526,7 +541,13 @@
                 try { recognition.stop(); } catch (e) {}
                 recognition = null;
             }
-            setRecordingUI(false);
+            micIcon.style.display = 'inline-block';
+            stopIcon.style.display = 'none';
+            lucide.createIcons();
+            recordBtn.style.background = '';
+            recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
+            recordBtn.classList.remove('pulse-ring');
+            actionText.textContent = t('clickToStart');
             if (finalTranscript.trim().length < 10) {
                 statusMsg.textContent = t('notEnough');
                 statusMsg.dataset.i18n = 'notEnough';
