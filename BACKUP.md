@@ -35,10 +35,11 @@ Built **VoiceForge** from scratch — a free Speech-to-Article web app with:
    - `lucide.createIcons()` after toggling button icons — ensures stop icon renders
    - Clear button also resets all state
 10. **Bug fixes (v3 — final):**
-   - `display: none/block` instead of CSS class toggles for mic/stop icons — stop button now reliably visible
-   - Instance ID guard (`recInstance`) prevents stale timeouts from interfering after stop/restart
-   - 200ms restart delay with fresh `SpeechRecognition` object on every `onend`
-   - All `onerror` paths call `stopRecording()` for clean teardown
+    - `display: none/block` instead of CSS class toggles for mic/stop icons — stop button now reliably visible
+    - Instance ID guard (`recInstance`) prevents stale timeouts from interfering after stop/restart
+    - 200ms restart delay with fresh `SpeechRecognition` object on every `onend`
+    - `finalTranscript` rebuilt from `e.results` on every `onresult` — no appending, no accumulation
+    - All `onerror` paths call `stopRecording()` for clean teardown
 
 
 ### Deployments
