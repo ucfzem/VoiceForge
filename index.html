@@ -457,8 +457,8 @@
         }
         groqKeyInput.addEventListener('input', checkKey);
         function setRecordingUI(recording) {
-            micIcon.classList.toggle('hidden', recording);
-            stopIcon.classList.toggle('hidden', !recording);
+            document.getElementById('micIcon').classList.toggle('hidden', recording);
+            document.getElementById('stopIcon').classList.toggle('hidden', !recording);
             if (recording) {
                 recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
                 recordBtn.style.background = 'var(--danger)';
@@ -520,8 +520,10 @@
                 clearTimeout(restartTimer);
                 restartTimer = setTimeout(() => {
                     if (!isRecording || isEngineRunning) return;
+                    const newRec = createRecognitionInstance();
                     try {
-                        recognition.start();
+                        newRec.start();
+                        recognition = newRec;
                     } catch (err) {
                         console.error('Restart failed:', err);
                     }
