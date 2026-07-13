@@ -759,37 +759,26 @@
                 alert('TTS not supported in this browser.');
                 return;
             }
-            const doSpeak = () => {
-                try {
-                    speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-                    utterance.rate = 0.9;
-                    const voices = speechSynthesis.getVoices();
-                    if (voices.length) {
-                        utterance.voice = voices.find(v => v.lang.startsWith(currentLang)) || voices[0];
-                    }
-                    utterance.onstart = () => {
-                        speaking = true;
-                        playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
-                        lucide.createIcons();
-                    };
-                    utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-                    utterance.onerror = (e) => { console.error('TTS error:', e); speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-                    speechSynthesis.speak(utterance);
-                } catch (e) {
-                    console.error('speakText error:', e);
-                    alert('TTS failed: ' + e.message);
-                }
-            };
             try {
-                if (speechSynthesis.getVoices().length === 0) {
-                    speechSynthesis.onvoiceschanged = doSpeak;
-                } else {
-                    doSpeak();
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+                utterance.rate = 0.9;
+                const voices = speechSynthesis.getVoices();
+                if (voices.length) {
+                    utterance.voice = voices.find(v => v.lang.startsWith(currentLang)) || voices[0];
                 }
+                utterance.onstart = () => {
+                    speaking = true;
+                    playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
+                    lucide.createIcons();
+                };
+                utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                utterance.onerror = (e) => { console.error('TTS error:', e.error); speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                speechSynthesis.speak(utterance);
             } catch (e) {
-                console.error('speakText outer error:', e);
+                console.error('speakText error:', e);
+                alert('TTS failed: ' + e.message);
             }
         }
 
