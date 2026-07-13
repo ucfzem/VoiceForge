@@ -616,17 +616,57 @@
             liveTranscriptCard.classList.add('hidden');
             statusMsg.textContent = t('structuring');
             statusMsg.dataset.i18n = 'structuring';
+            const BASE_PROMPT = `You are a precise knowledge-base synthesizer. Turn a messy speech transcript into a clean, perfectly structured article.
+
+CRITICAL RULES:
+1. Preserve the speaker's exact thoughts, meanings, data points, and viewpoints.
+2. Correct grammar, fix punctuation errors, repair obvious word errors, and logically reorder ideas into structured readable sections.
+3. Do NOT invent new information, inject external examples, or remove unique arguments.
+4. Do NOT change the speaker's core opinions.
+
+If any part of the transcript is foggy, heavily contradictory, incomplete, or ambiguous, append a "Questions" section at the end.
+
+Return ONLY valid JSON with this exact shape:
+{
+  "title": "Clean concise title",
+  "cleanArticle": "Polished markdown article text",
+  "questions": ["Question 1?", "Question 2?"]
+}
+If no ambiguities, "questions" is an empty array.`;
+            const lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+            const sysPrompt = BASE_PROMPT + `\n\nThe user spoke in language code: ${lang}. Write the title, article, and questions in the same language as the transcript.`;
             try {
-                const res = await fetch('/api/groq', {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ transcript: text, apiKey: key, language: RECOGNITION_LOCALE[currentLang] || 'en-US' })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + key
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.3-70b-versatile',
+                        messages: [
+                            { role: 'system', content: sysPrompt },
+                            { role: 'user', content: text }
+                        ],
+                        temperature: 0.2,
+                        response_format: { type: 'json_object' }
+                    })
                 });
                 if (!res.ok) {
-                    const err = await res.json().catch(() => ({ error: res.statusText }));
-                    throw new Error(err.error || `HTTP ${res.status}`);
+                    const errData = await res.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || errData.error || `Groq API returned ${res.status}`;
+                    if (res.status === 429) throw new Error('Groq rate limit reached. Wait a moment and try again.');
+                    throw new Error(errMsg);
                 }
-                const payload = await res.json();
+                const data = await res.json();
+                const content = data.choices?.[0]?.message?.content;
+                if (!content) throw new Error('Empty response from Groq');
+                let payload;
+                try {
+                    payload = JSON.parse(content);
+                } catch (e) {
+                    throw new Error('Failed to parse Groq response as JSON');
+                }
                 generatedTitle.innerText = payload.title || 'VoiceForge';
                 articleBody.innerText = payload.cleanArticle;
                 questionsList.innerHTML = '';
