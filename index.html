@@ -746,7 +746,7 @@
         const playBtn = document.getElementById('playBtn');
 
         function stopTTS() {
-            speechSynthesis.cancel();
+            try { speechSynthesis.cancel(); } catch(e) {}
             speaking = false;
             playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play');
             lucide.createIcons();
@@ -754,26 +754,25 @@
 
         function speakText(text) {
             const doSpeak = () => {
-                speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-                utterance.rate = 0.9;
-                const voices = speechSynthesis.getVoices();
-                if (voices.length) {
-                    const langPrefix = currentLang;
-                    utterance.voice = voices.find(v => v.lang.startsWith(langPrefix)) || voices[0];
-                }
-                utterance.onstart = () => {
-                    speaking = true;
-                    playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
-                    lucide.createIcons();
-                };
-                utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-                utterance.onerror = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-                speechSynthesis.speak(utterance);
+                try {
+                    speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+                    utterance.rate = 0.9;
+                    try { utterance.voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(currentLang)) || null; } catch(e) {}
+                    utterance.onstart = () => {
+                        speaking = true;
+                        playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
+                        lucide.createIcons();
+                    };
+                    utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                    utterance.onerror = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                    speechSynthesis.speak(utterance);
+                } catch(e) {}
             };
-            if (speechSynthesis.getVoices().length === 0) {
-                speechSynthesis.onvoiceschanged = doSpeak;
+            if (!speechSynthesis || speechSynthesis.getVoices().length === 0) {
+                const fallback = setTimeout(doSpeak, 500);
+                speechSynthesis.addEventListener('voiceschanged', () => { clearTimeout(fallback); doSpeak(); }, { once: true });
             } else {
                 doSpeak();
             }
