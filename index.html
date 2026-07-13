@@ -670,19 +670,9 @@
             statusMsg.dataset.i18n = 'cleared';
         });
 
-        // TTS (Text-to-Speech) support
+        // TTS (Text-to-Speech)
         let ttsUtterance = null;
         const playBtn = document.getElementById('playBtn');
-
-        function getTTSVoice(lang) {
-            const voiceMap = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', ar: 'ar-SA' };
-            const target = voiceMap[lang] || 'en-US';
-            const voices = speechSynthesis.getVoices();
-            const match = voices.find(v => v.lang.startsWith(target));
-            if (match) return match;
-            const anyMatch = voices.find(v => v.lang.startsWith(lang));
-            return anyMatch || null;
-        }
 
         function stopTTS() {
             speechSynthesis.cancel();
@@ -694,42 +684,22 @@
         playBtn.addEventListener('click', () => {
             const text = articleBody.innerText;
             if (!text) return;
-
-            if (ttsUtterance) {
-                stopTTS();
-                return;
-            }
+            if (ttsUtterance) { stopTTS(); return; }
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
             utterance.rate = 0.9;
-            utterance.pitch = 1;
-
-            const voice = getTTSVoice(currentLang);
-            if (voice) utterance.voice = voice;
 
             utterance.onstart = () => {
                 playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
                 lucide.createIcons();
             };
-
-            utterance.onend = () => {
-                ttsUtterance = null;
-                playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play');
-                lucide.createIcons();
-            };
-
-            utterance.onerror = () => {
-                ttsUtterance = null;
-                playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play');
-                lucide.createIcons();
-            };
+            utterance.onend = () => { stopTTS(); };
+            utterance.onerror = () => { stopTTS(); };
 
             ttsUtterance = utterance;
             speechSynthesis.speak(utterance);
         });
-
-        if (speechSynthesis) speechSynthesis.getVoices();
         lucide.createIcons();
     </script>
 </body>
