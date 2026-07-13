@@ -164,7 +164,7 @@
                 <div class="flex items-center gap-2 mb-3 border-b border-theme pb-3" style="color:var(--success)">
                     <i data-lucide="file-text" class="w-5 h-5"></i>
                     <h3 class="font-bold text-sm tracking-wide uppercase" data-i18n="polishedArticle">Polished Article</h3>
-                    <div class="ml-auto flex gap-2 no-rtl-flip">
+                    <div class="ml-auto flex gap-2 no-rtl-flip flex-wrap">
                         <button id="playBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
                             <i data-lucide="play" class="w-3 h-3"></i> <span data-i18n="play">Play</span>
                         </button>
@@ -751,18 +751,30 @@
         }
 
         function speakText(text) {
-            speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
-            utterance.rate = 0.9;
-            utterance.onstart = () => {
-                speaking = true;
-                playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
-                lucide.createIcons();
+            const doSpeak = () => {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+                utterance.rate = 0.9;
+                const voices = speechSynthesis.getVoices();
+                if (voices.length) {
+                    const langPrefix = currentLang;
+                    utterance.voice = voices.find(v => v.lang.startsWith(langPrefix)) || voices[0];
+                }
+                utterance.onstart = () => {
+                    speaking = true;
+                    playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
+                    lucide.createIcons();
+                };
+                utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                utterance.onerror = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                speechSynthesis.speak(utterance);
             };
-            utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-            utterance.onerror = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-            speechSynthesis.speak(utterance);
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.onvoiceschanged = doSpeak;
+            } else {
+                doSpeak();
+            }
         }
 
         playBtn.addEventListener('click', () => {
