@@ -1,0 +1,800 @@
+<!DOCTYPE html><html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceForge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; transition: background .3s, color .3s; }
+        :root {
+            --bg-primary: #1a1410;
+            --bg-secondary: #231a14;
+            --bg-card: #2a1f18;
+            --bg-input: #1a1410;
+            --text-primary: #f5efe6;
+            --text-secondary: #b8a99a;
+            --text-muted: #8a7a6a;
+            --border: #3d2e22;
+            --accent: #c8953c;
+            --accent-hover: #d4a84b;
+            --accent-dim: rgba(200, 149, 60, 0.15);
+            --glow: rgba(200, 149, 60, 0.15);
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #65a30d;
+        }
+        .light {
+            --bg-primary: #f5f0eb;
+            --bg-secondary: #ede5db;
+            --bg-card: #fff8f0;
+            --bg-input: #f5f0eb;
+            --text-primary: #2a1f18;
+            --text-secondary: #6b5a4a;
+            --text-muted: #8a7a6a;
+            --border: #d4c9bc;
+            --accent: #a67c3e;
+            --accent-hover: #8b6632;
+            --accent-dim: rgba(166, 124, 62, 0.12);
+            --glow: rgba(166, 124, 62, 0.12);
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #65a30d;
+        }
+        body { background: var(--bg-primary); color: var(--text-primary); }
+        .bg-theme-primary { background: var(--bg-primary); }
+        .bg-theme-secondary { background: var(--bg-secondary); }
+        .bg-theme-card { background: var(--bg-card); }
+        .bg-theme-input { background: var(--bg-input); }
+        .text-theme-primary { color: var(--text-primary); }
+        .text-theme-secondary { color: var(--text-secondary); }
+        .text-theme-muted { color: var(--text-muted); }
+        .border-theme { border-color: var(--border); }
+        .text-accent { color: var(--accent); }
+        .bg-accent { background: var(--accent); }
+        .bg-accent-dim { background: var(--accent-dim); }
+        .hover\:bg-accent-hover:hover { background: var(--accent-hover); }
+        .shadow-glow { box-shadow: 0 0 30px var(--glow); }
+        .border-accent { border-color: var(--accent); }
+        .pulse-ring { animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+            70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn .35s ease-out; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        [dir="rtl"] { text-align: right; }
+        [dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
+        [dir="rtl"] .mr-2 { margin-right: 0; margin-left: .5rem; }
+        [dir="rtl"] .gap-reverse { flex-direction: row-reverse; }
+        [dir="rtl"] .lucide { transform: scaleX(-1); }
+        [dir="rtl"] .no-rtl-flip .lucide { transform: none; }
+        [dir="rtl"] select { background-position: left .5rem center !important; padding-right: .75rem; padding-left: 2rem; }
+        [dir="rtl"] .flag-icon { transform: none !important; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
+        .card, .container, .groq-key-row { max-width: 100%; }
+        .groq-key-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+        .groq-key-row input {
+            flex: 1 1 200px;
+            min-width: 0;
+            height: 36px;
+        }
+        .groq-key-row button,
+        .groq-key-row a {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+        @media (max-width: 480px) {
+            .groq-key-row { flex-direction: column; }
+            .groq-key-row input { flex: none; width: 100%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-accent-dim">
+    <header class="border-b border-theme bg-theme-primary/80 backdrop-blur sticky top-0 z-50 transition-colors">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="wand-2" class="text-accent w-5 h-5"></i>
+                <h1 class="text-lg font-bold tracking-tight text-theme-primary">VoiceForge</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="langSelect" class="bg-theme-card border border-theme rounded-lg px-2 py-1.5 text-xs text-theme-primary focus:outline-none focus:border-accent transition-colors appearance-none cursor-pointer">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="ar">🇲🇦 AR</option>
+                </select>
+                <button id="themeToggle" type="button" class="w-8 h-8 rounded-full bg-theme-card border border-theme flex items-center justify-center hover:bg-accent-dim transition-all cursor-pointer">
+                    <i data-lucide="moon" id="moonIcon" class="w-4 h-4 text-accent"></i>
+                    <i data-lucide="sun" id="sunIcon" class="w-4 h-4 text-accent hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-5 flex flex-col gap-5 custom-scrollbar overflow-y-auto">
+        <details class="bg-theme-card border border-theme rounded-xl p-4 group transition-colors" open>
+            <summary class="list-none flex items-center justify-between cursor-pointer font-semibold text-sm text-theme-secondary select-none">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="key" class="w-4 h-4 text-accent"></i>
+                    <span data-i18n="configTitle">Configure Groq API Key</span>
+                </div>
+                <span class="text-xs text-accent group-open:hidden" data-i18n="expand">Click to expand</span>
+                <span class="text-xs text-theme-muted hidden group-open:block" data-i18n="collapse">Click to collapse</span>
+            </summary>
+            <div class="mt-4 pt-4 border-t border-theme">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-theme-secondary mb-2" data-i18n="groqKeyLabel">Groq API Key</label>
+                    <div class="groq-key-row">
+                        <input type="password" id="groqKey" class="bg-theme-input border border-theme rounded-lg px-3 text-sm text-theme-primary focus:outline-none focus:border-accent transition-colors placeholder:text-theme-muted" data-i18n-placeholder="groqKeyPlaceholder" placeholder="gsk_... get one free at console.groq.com" autocomplete="new-password">
+                        <button id="saveKeyBtn" type="button" class="bg-accent hover:bg-accent-hover text-white text-xs px-3 rounded-lg flex items-center gap-1 transition-colors font-medium cursor-pointer">
+                            <i data-lucide="save" class="w-3 h-3"></i> <span data-i18n="save">Save</span>
+                        </button>
+                        <a href="https://console.groq.com/keys" target="_blank" class="bg-theme-card border border-theme hover:bg-accent-dim text-xs text-theme-secondary px-3 rounded-lg flex items-center gap-1 transition-colors">
+                            <i data-lucide="external-link" class="w-3 h-3"></i> <span data-i18n="getKey">Get Key</span>
+                        </a>
+                    </div>
+                    <p id="keySavedMsg" class="text-xs mt-2 hidden flex items-center gap-1" style="color:var(--success)"><i data-lucide="check-circle" class="w-3 h-3"></i> <span data-i18n="keySaved">Key saved to browser.</span></p>
+                    <p class="text-xs text-theme-muted mt-2" data-i18n="freeTier">Free tier: 30 req/min, 6000 req/day. No credit card needed.</p>
+                </div>
+            </div>
+        </details>
+        <div class="text-center py-3">
+            <p id="statusMessage" class="text-theme-secondary text-sm font-medium" data-i18n="statusDefault">Enter your Groq key, select language, then click the mic and start speaking.</p>
+            <p id="transcriptPreview" class="text-theme-muted text-xs mt-2 hidden italic"></p>
+        </div>
+        <div id="loaderView" class="hidden flex flex-col items-center justify-center py-10 gap-4">
+            <div class="w-10 h-10 border-4 rounded-full animate-spin" style="border-color:var(--accent-dim);border-top-color:var(--accent)"></div>
+            <p class="text-sm text-theme-muted font-medium" data-i18n="structuring">Structuring your ideas into a polished article...</p>
+        </div>
+        <div id="resultWorkspace" class="hidden flex flex-col gap-5 fade-in">
+            <h2 id="generatedTitle" class="text-2xl font-extrabold text-theme-primary tracking-tight"></h2>
+            <div class="bg-theme-card border border-theme rounded-xl p-5 shadow-glow transition-colors">
+                <div class="flex items-center gap-2 mb-3 border-b border-theme pb-3" style="color:var(--success)">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <h3 class="font-bold text-sm tracking-wide uppercase" data-i18n="polishedArticle">Polished Article</h3>
+                    <div class="ml-auto flex gap-2 no-rtl-flip flex-wrap">
+                        <button id="playBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
+                            <i data-lucide="play" class="w-3 h-3"></i> <span data-i18n="play">Play</span>
+                        </button>
+                        <button id="copyBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
+                            <i data-lucide="copy" class="w-3 h-3"></i> <span data-i18n="copy">Copy</span>
+                        </button>
+                        <button id="downloadBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
+                            <i data-lucide="download" class="w-3 h-3"></i> <span data-i18n="download">.md</span>
+                        </button>
+                        <button id="clearBtn" type="button" class="text-xs bg-theme-card border border-theme hover:bg-accent-dim text-theme-secondary px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> <span data-i18n="clear">Clear</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="articleBody" class="text-theme-primary text-base leading-relaxed whitespace-pre-wrap"></div>
+            </div>
+            <div id="questionsCard" class="hidden bg-accent-dim border border-theme rounded-xl p-5 transition-colors">
+                <div class="flex items-center gap-2 mb-3" style="color:var(--accent)">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                    <h3 class="font-bold text-sm tracking-wide uppercase" data-i18n="clarificationQuestions">Clarification Questions</h3>
+                </div>
+                <div id="questionsList" class="flex flex-col gap-3"></div>
+            </div>
+        </div>
+        <div id="liveTranscriptCard" class="hidden bg-theme-card border border-theme rounded-xl p-5 transition-colors">
+            <div class="flex items-center gap-2 mb-3 text-accent">
+                <i data-lucide="text" class="w-5 h-5"></i>
+                <h3 class="font-bold text-sm tracking-wide uppercase" data-i18n="liveTranscript">Live Transcript</h3>
+                <span class="ml-auto flex items-center gap-1.5 text-xs" style="color:var(--danger)">
+                    <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--danger)"></span> <span data-i18n="rec">REC</span>
+                </span>
+            </div>
+            <div id="liveTranscriptText" class="text-theme-secondary text-sm leading-relaxed min-h-[50px]"></div>
+        </div>
+    </main>
+    <footer class="bg-theme-primary border-t border-theme py-5 px-4 shrink-0 transition-colors">
+        <div class="max-w-4xl mx-auto flex flex-col items-center gap-2">
+            <button id="recordBtn" type="button"
+                class="relative w-14 h-14 rounded-full bg-accent hover:bg-accent-hover flex items-center justify-center transition-all duration-300 active:scale-95 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-glow">
+                <i data-lucide="mic" id="micIcon" class="w-6 h-6 text-white"></i>
+                <i data-lucide="square" id="stopIcon" class="w-6 h-6 text-white hidden"></i>
+            </button>
+            <p id="actionText" class="text-xs font-semibold text-theme-muted tracking-wide uppercase" data-i18n="clickToStart">Click to start speaking</p>
+        </div>
+    </footer>
+    <script>
+        lucide.createIcons();
+        const TRANSLATIONS = {
+            en: {
+                configTitle: 'Configure Groq API Key',
+                expand: 'Click to expand',
+                collapse: 'Click to collapse',
+                groqKeyLabel: 'Groq API Key',
+                groqKeyPlaceholder: 'gsk_... get one free at console.groq.com',
+                save: 'Save',
+                getKey: 'Get Key',
+                keySaved: 'Key saved to browser.',
+                freeTier: 'Free tier: 30 req/min, 6000 req/day. No credit card needed.',
+                statusDefault: 'Enter your Groq key, select language, then click the mic and start speaking.',
+                structuring: 'Structuring your ideas into a polished article...',
+                polishedArticle: 'Polished Article',
+                clarificationQuestions: 'Clarification Questions',
+                liveTranscript: 'Live Transcript',
+                play: 'Play',
+                stop: 'Stop',
+                copy: 'Copy',
+                copied: 'Copied!',
+                download: '.md',
+                clear: 'Clear',
+                cleared: 'Cleared.',
+                rec: 'REC',
+                clickToStart: 'Click to start speaking',
+                clickToStop: 'Click to stop & generate',
+                listening: 'Listening...',
+                speechDetected: 'Speech detected',
+                notEnough: 'Not enough speech detected. Try again.',
+                generated: 'Article generated successfully.',
+                notSupported: 'Speech recognition not supported. Use Chrome, Edge, or Safari.',
+                micDenied: 'Microphone access denied. Grant permission and try again.',
+                micError: 'Could not start microphone:',
+                noKey: 'Enter a valid Groq API key first (gsk_...). Free at console.groq.com',
+                noKeySave: 'Enter a valid Groq key (starts with gsk_) before saving.',
+                speakFreely: 'Speak freely — your words are being transcribed in real time.',
+                recordingStopped: 'Recording stopped — Groq key required.',
+                reconnecting: 'Reconnecting mic...',
+            },
+            fr: {
+                configTitle: 'Configurer la clé API Groq',
+                expand: 'Cliquer pour développer',
+                collapse: 'Cliquer pour réduire',
+                groqKeyLabel: 'Clé API Groq',
+                groqKeyPlaceholder: 'gsk_... obtenez-en une gratuite sur console.groq.com',
+                save: 'Enregistrer',
+                getKey: 'Obtenir une clé',
+                keySaved: 'Clé enregistrée dans le navigateur.',
+                freeTier: 'Gratuit : 30 req/min, 6000 req/jour. Aucune carte bancaire requise.',
+                statusDefault: 'Entrez votre clé Groq, sélectionnez la langue, puis cliquez sur le micro et parlez.',
+                structuring: 'Structuration de vos idées en un article soigné...',
+                polishedArticle: 'Article Soigné',
+                clarificationQuestions: 'Questions de Clarification',
+                liveTranscript: 'Transcription en Direct',
+                play: 'Lecture',
+                stop: 'Arrêt',
+                copy: 'Copier',
+                copied: 'Copié !',
+                download: '.md',
+                clear: 'Effacer',
+                cleared: 'Effacé.',
+                rec: 'ENR',
+                clickToStart: 'Cliquez pour parler',
+                clickToStop: 'Cliquez pour arrêter & générer',
+                listening: 'Écoute...',
+                speechDetected: 'Parole détectée',
+                notEnough: 'Pas assez de parole détectée. Réessayez.',
+                generated: 'Article généré avec succès.',
+                notSupported: 'Reconnaissance vocale non supportée. Utilisez Chrome, Edge ou Safari.',
+                micDenied: 'Accès au micro refusé. Autorisez-le et réessayez.',
+                micError: 'Impossible de démarrer le micro :',
+                noKey: 'Entrez d\'abord une clé Groq valide (gsk_...). Gratuite sur console.groq.com',
+                noKeySave: 'Entrez une clé Groq valide (commence par gsk_) avant d\'enregistrer.',
+                speakFreely: 'Parlez librement — vos mots sont transcrits en temps réel.',
+                recordingStopped: 'Enregistrement arrêté — clé Groq requise.',
+                reconnecting: 'Reconnexion du micro...',
+            },
+            es: {
+                configTitle: 'Configurar la clave API de Groq',
+                expand: 'Haga clic para expandir',
+                collapse: 'Haga clic para colapsar',
+                groqKeyLabel: 'Clave API de Groq',
+                groqKeyPlaceholder: 'gsk_... obtenga una gratis en console.groq.com',
+                save: 'Guardar',
+                getKey: 'Obtener clave',
+                keySaved: 'Clave guardada en el navegador.',
+                freeTier: 'Gratis: 30 req/min, 6000 req/día. Sin tarjeta de crédito.',
+                statusDefault: 'Ingrese su clave Groq, seleccione idioma, luego haga clic en el micrófono y hable.',
+                structuring: 'Estructurando sus ideas en un artículo pulido...',
+                polishedArticle: 'Artículo Pulido',
+                clarificationQuestions: 'Preguntas de Clarificación',
+                liveTranscript: 'Transcripción en Vivo',
+                play: 'Reproducir',
+                stop: 'Detener',
+                copy: 'Copiar',
+                copied: '¡Copiado!',
+                download: '.md',
+                clear: 'Limpiar',
+                cleared: 'Limpiado.',
+                rec: 'GRB',
+                clickToStart: 'Haga clic para hablar',
+                clickToStop: 'Haga clic para detener y generar',
+                listening: 'Escuchando...',
+                speechDetected: 'Voz detectada',
+                notEnough: 'No se detectó suficiente voz. Intente de nuevo.',
+                generated: 'Artículo generado con éxito.',
+                notSupported: 'Reconocimiento de voz no compatible. Use Chrome, Edge o Safari.',
+                micDenied: 'Acceso al micrófono denegado. Conceda permiso e intente de nuevo.',
+                micError: 'No se pudo iniciar el micrófono:',
+                noKey: 'Ingrese primero una clave Groq válida (gsk_...). Gratis en console.groq.com',
+                noKeySave: 'Ingrese una clave Groq válida (empieza con gsk_) antes de guardar.',
+                speakFreely: 'Hable libremente — sus palabras se transcriben en tiempo real.',
+                recordingStopped: 'Grabación detenida — se requiere clave Groq.',
+                reconnecting: 'Reconectando micrófono...',
+            },
+            ar: {
+                configTitle: 'تكوين مفتاح API لـ Groq',
+                expand: 'انقر للتوسيع',
+                collapse: 'انقر للطي',
+                groqKeyLabel: 'مفتاح API لـ Groq',
+                groqKeyPlaceholder: 'gsk_... احصل على مفتاح مجاني من console.groq.com',
+                save: 'حفظ',
+                getKey: 'الحصول على مفتاح',
+                keySaved: 'تم حفظ المفتاح في المتصفح.',
+                freeTier: 'المستوى المجاني: 30 طلب/دقيقة، 6000 طلب/يوم. لا حاجة لبطاقة ائتمان.',
+                statusDefault: 'أدخل مفتاح Groq، اختر اللغة، ثم انقر على الميكروفون وابدأ بالتحدث.',
+                structuring: 'تنظيم أفكارك في مقال منسق...',
+                polishedArticle: 'مقال منسق',
+                clarificationQuestions: 'أسئلة توضيحية',
+                liveTranscript: 'النص المباشر',
+                play: 'تشغيل',
+                stop: 'إيقاف',
+                copy: 'نسخ',
+                copied: 'تم النسخ!',
+                download: '.md',
+                clear: 'مسح',
+                cleared: 'تم المسح.',
+                rec: 'تسجيل',
+                clickToStart: 'انقر لبدء التحدث',
+                clickToStop: 'انقر للإيقاف والإنشاء',
+                listening: 'يستمع...',
+                speechDetected: 'تم اكتشاف الكلام',
+                notEnough: 'لم يتم اكتشاف كلام كاف. حاول مرة أخرى.',
+                generated: 'تم إنشاء المقال بنجاح.',
+                notSupported: 'التعرف على الصوت غير مدعوم. استخدم Chrome أو Edge أو Safari.',
+                micDenied: 'تم رفض الوصول إلى الميكروفون. امنح الإذن وحاول مرة أخرى.',
+                micError: 'تعذر تشغيل الميكروفون:',
+                noKey: 'أدخل مفتاح Groq صالح أولاً (gsk_...). مجاني على console.groq.com',
+                noKeySave: 'أدخل مفتاح Groq صالح (يبدأ بـ gsk_) قبل الحفظ.',
+                speakFreely: 'تحدث بحرية — يتم نسخ كلماتك في الوقت الفعلي.',
+                recordingStopped: 'تم إيقاف التسجيل — مفتاح Groq مطلوب.',
+                reconnecting: 'إعادة الاتصال بالميكروفون...',
+            }
+        };
+        const RECOGNITION_LOCALE = { en: 'en-US', fr: 'fr-FR', es: 'es-ES', ar: 'ar-SA' };
+        const themeToggle = document.getElementById('themeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        const langSelect = document.getElementById('langSelect');
+        const groqKeyInput = document.getElementById('groqKey');
+        const saveKeyBtn = document.getElementById('saveKeyBtn');
+        const keySavedMsg = document.getElementById('keySavedMsg');
+        const statusMsg = document.getElementById('statusMessage');
+        const transcriptPreview = document.getElementById('transcriptPreview');
+        const loaderView = document.getElementById('loaderView');
+        const resultWorkspace = document.getElementById('resultWorkspace');
+        const generatedTitle = document.getElementById('generatedTitle');
+        const articleBody = document.getElementById('articleBody');
+        const questionsCard = document.getElementById('questionsCard');
+        const questionsList = document.getElementById('questionsList');
+        const recordBtn = document.getElementById('recordBtn');
+        const micIcon = document.getElementById('micIcon');
+        const stopIcon = document.getElementById('stopIcon');
+        const actionText = document.getElementById('actionText');
+        const liveTranscriptCard = document.getElementById('liveTranscriptCard');
+        const liveTranscriptText = document.getElementById('liveTranscriptText');
+        let recognition = null;
+        let isRecording = false;
+        let isEngineRunning = false;
+        let restartTimer = null;
+        let finalTranscript = '';
+        let processedResultsCount = 0;
+        let committedSegments = [];
+        let currentLang = 'en';
+        let currentTheme = 'dark';
+        function normalizeForCompare(str) {
+            return str.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+        function addFinalSegment(segment) {
+            const clean = segment.trim();
+            if (!clean) return;
+            const last = committedSegments[committedSegments.length - 1];
+            if (last) {
+                const a = normalizeForCompare(last);
+                const b = normalizeForCompare(clean);
+                if (a === b) return;
+                if (b.startsWith(a)) {
+                    committedSegments[committedSegments.length - 1] = clean;
+                    finalTranscript = committedSegments.join(' ') + ' ';
+                    return;
+                }
+                if (a.startsWith(b)) return;
+            }
+            committedSegments.push(clean);
+            finalTranscript = committedSegments.join(' ') + ' ';
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        function t(key) { return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS.en[key] || key; }
+        function translateUI() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = t(key);
+                } else {
+                    el.textContent = t(key);
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = t(el.dataset.i18nPlaceholder);
+            });
+            if (!isRecording) {
+                actionText.textContent = t('clickToStart');
+            } else {
+                actionText.textContent = t('clickToStop');
+            }
+            const statusKey = statusMsg.dataset.i18n;
+            if (statusKey) statusMsg.textContent = t(statusKey);
+            if (!SpeechRecognition) {
+                statusMsg.textContent = t('notSupported');
+                statusMsg.dataset.i18n = 'notSupported';
+            }
+            lucide.createIcons();
+        }
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.classList.toggle('light', theme === 'light');
+            moonIcon.classList.toggle('hidden', theme === 'light');
+            sunIcon.classList.toggle('hidden', theme === 'dark');
+            localStorage.setItem('voiceforge_theme', theme);
+        }
+        function setLang(locale) {
+            currentLang = locale;
+            const dir = locale === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.dir = dir;
+            document.documentElement.lang = locale === 'ar' ? 'ar' : locale === 'fr' ? 'fr' : locale === 'es' ? 'es' : 'en';
+            localStorage.setItem('voiceforge_lang', locale);
+            translateUI();
+        }
+        const savedTheme = localStorage.getItem('voiceforge_theme') || 'dark';
+        setTheme(savedTheme);
+        const savedLang = localStorage.getItem('voiceforge_lang') || 'en';
+        langSelect.value = savedLang;
+        setLang(savedLang);
+        themeToggle.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+        langSelect.addEventListener('change', () => { setLang(langSelect.value); stopTTS(); });
+        const savedKey = localStorage.getItem('voiceforge_groq_key');
+        if (savedKey) {
+            groqKeyInput.value = savedKey;
+            keySavedMsg.classList.remove('hidden');
+            setTimeout(() => keySavedMsg.classList.add('hidden'), 3000);
+        }
+        function saveKey() {
+            const key = groqKeyInput.value.trim();
+            if (key.startsWith('gsk_')) {
+                localStorage.setItem('voiceforge_groq_key', key);
+                keySavedMsg.classList.remove('hidden');
+                lucide.createIcons();
+                setTimeout(() => keySavedMsg.classList.add('hidden'), 3000);
+            } else {
+                alert(t('noKeySave'));
+            }
+        }
+        saveKeyBtn.addEventListener('click', saveKey);
+        groqKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveKey(); });
+        function checkKey() {
+            const hasKey = groqKeyInput.value.trim().startsWith('gsk_');
+            if (!hasKey && isRecording) {
+                stopRecording();
+                statusMsg.textContent = t('recordingStopped');
+                statusMsg.dataset.i18n = 'recordingStopped';
+            }
+        }
+        groqKeyInput.addEventListener('input', checkKey);
+        function setRecordingUI(recording) {
+            document.getElementById('micIcon').classList.toggle('hidden', recording);
+            document.getElementById('stopIcon').classList.toggle('hidden', !recording);
+            if (recording) {
+                recordBtn.classList.remove('bg-accent', 'hover:bg-accent-hover');
+                recordBtn.style.background = 'var(--danger)';
+                recordBtn.classList.add('pulse-ring');
+                actionText.textContent = t('clickToStop');
+            } else {
+                recordBtn.style.background = '';
+                recordBtn.classList.add('bg-accent', 'hover:bg-accent-hover');
+                recordBtn.classList.remove('pulse-ring');
+                actionText.textContent = t('clickToStart');
+            }
+        }
+        function createRecognitionInstance() {
+            const rec = new SpeechRecognition();
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+            rec.onstart = () => {
+                isEngineRunning = true;
+                processedResultsCount = 0;
+                if (statusMsg.dataset.i18n === 'reconnecting') {
+                    statusMsg.textContent = t('speakFreely');
+                    statusMsg.dataset.i18n = 'speakFreely';
+                }
+            };
+            rec.onresult = (e) => {
+                let interim = '';
+                for (let i = 0; i < e.results.length; i++) {
+                    const r = e.results[i];
+                    if (r.isFinal) {
+                        if (i >= processedResultsCount) {
+                            addFinalSegment(r[0].transcript);
+                            processedResultsCount = i + 1;
+                        }
+                    } else {
+                        interim += r[0].transcript;
+                    }
+                }
+                const display = finalTranscript + interim;
+                liveTranscriptText.innerText = display || '...';
+                transcriptPreview.classList.remove('hidden');
+                transcriptPreview.textContent = interim ? t('listening') : t('speechDetected');
+            };
+            rec.onerror = (e) => {
+                console.error('Speech error:', e.error);
+                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                    alert(t('micDenied'));
+                    stopRecording();
+                } else if (e.error === 'audio-capture') {
+                    alert(t('micError') + ' ' + e.error);
+                    stopRecording();
+                }
+            };
+            rec.onend = () => {
+                isEngineRunning = false;
+                if (!isRecording) return;
+                clearTimeout(restartTimer);
+                restartTimer = setTimeout(() => {
+                    if (!isRecording || isEngineRunning) return;
+                    const newRec = createRecognitionInstance();
+                    try {
+                        newRec.start();
+                        recognition = newRec;
+                    } catch (err) {
+                        console.error('Restart failed:', err);
+                    }
+                }, 50);
+            };
+            return rec;
+        }
+        function startRecording() {
+            const key = groqKeyInput.value.trim();
+            if (!key || !key.startsWith('gsk_')) {
+                alert(t('noKey'));
+                return;
+            }
+            if (!SpeechRecognition) {
+                alert(t('notSupported'));
+                return;
+            }
+            finalTranscript = '';
+            processedResultsCount = 0;
+            committedSegments = [];
+            recognition = createRecognitionInstance();
+            try {
+                recognition.start();
+                isRecording = true;
+                liveTranscriptCard.classList.remove('hidden');
+                liveTranscriptText.innerText = t('listening');
+                setRecordingUI(true);
+                statusMsg.textContent = t('speakFreely');
+                statusMsg.dataset.i18n = 'speakFreely';
+            } catch (err) {
+                alert(t('micError') + ' ' + err.message);
+            }
+        }
+        function stopRecording() {
+            isRecording = false;
+            clearTimeout(restartTimer);
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+            }
+            setRecordingUI(false);
+            if (finalTranscript.trim().length < 10) {
+                statusMsg.textContent = t('notEnough');
+                statusMsg.dataset.i18n = 'notEnough';
+                liveTranscriptCard.classList.add('hidden');
+                return;
+            }
+            callGroq(finalTranscript.trim());
+        }
+        async function callGroq(text) {
+            const key = groqKeyInput.value.trim();
+            loaderView.classList.remove('hidden');
+            resultWorkspace.classList.add('hidden');
+            liveTranscriptCard.classList.add('hidden');
+            statusMsg.textContent = t('structuring');
+            statusMsg.dataset.i18n = 'structuring';
+            try {
+                const res = await fetch('/api/groq', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transcript: text, apiKey: key, language: RECOGNITION_LOCALE[currentLang] || 'en-US' })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: res.statusText }));
+                    throw new Error(err.error || `HTTP ${res.status}`);
+                }
+                const payload = await res.json();
+                generatedTitle.innerText = payload.title || 'VoiceForge';
+                articleBody.innerText = payload.cleanArticle;
+                questionsList.innerHTML = '';
+                if (payload.questions && payload.questions.length > 0) {
+                    payload.questions.forEach(q => {
+                        const row = document.createElement('div');
+                        row.className = "flex items-start gap-3 bg-theme-card border border-theme p-3 rounded-lg";
+                        row.innerHTML = '<span class="text-accent font-extrabold text-sm select-none">?</span><p class="text-sm text-theme-primary leading-normal"></p>';
+                        row.querySelector('p').innerText = q;
+                        questionsList.appendChild(row);
+                    });
+                    questionsCard.classList.remove('hidden');
+                } else {
+                    questionsCard.classList.add('hidden');
+                }
+                resultWorkspace.classList.remove('hidden');
+                saveArticleState();
+                statusMsg.textContent = t('generated');
+                statusMsg.dataset.i18n = 'generated';
+            } catch (err) {
+                console.error('Groq error:', err);
+                statusMsg.textContent = 'Error: ' + err.message;
+                statusMsg.dataset.i18n = '';
+                alert('Error: ' + err.message);
+            } finally {
+                loaderView.classList.add('hidden');
+            }
+        }
+        recordBtn.addEventListener('click', () => {
+            isRecording ? stopRecording() : startRecording();
+        });
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const text = articleBody.innerText;
+            if (!text) return;
+            await navigator.clipboard.writeText(text);
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> ' + t('copied');
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i> ' + t('copy');
+                lucide.createIcons();
+            }, 2000);
+        });
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const title = generatedTitle.innerText || 'VoiceForge';
+            const text = articleBody.innerText;
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = title.replace(/[^a-zA-Z0-9\u0600-\u06FF\u00C0-\u024F]/g, '-') + '.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (isRecording) stopRecording();
+            stopTTS();
+            finalTranscript = '';
+            committedSegments = [];
+            liveTranscriptText.innerText = '';
+            liveTranscriptCard.classList.add('hidden');
+            resultWorkspace.classList.add('hidden');
+            generatedTitle.innerText = '';
+            articleBody.innerText = '';
+            questionsList.innerHTML = '';
+            questionsCard.classList.add('hidden');
+            transcriptPreview.classList.add('hidden');
+            localStorage.removeItem('voiceforge_article');
+            statusMsg.textContent = t('cleared');
+            statusMsg.dataset.i18n = 'cleared';
+        });
+
+        // Persist generated article
+        function saveArticleState() {
+            const state = {
+                title: generatedTitle.innerText,
+                body: articleBody.innerText,
+                questions: [],
+                lang: currentLang
+            };
+            document.querySelectorAll('#questionsList p').forEach(p => state.questions.push(p.innerText));
+            localStorage.setItem('voiceforge_article', JSON.stringify(state));
+        }
+        function restoreArticleState() {
+            const raw = localStorage.getItem('voiceforge_article');
+            if (!raw) return;
+            try {
+                const state = JSON.parse(raw);
+                if (state.title || state.body) {
+                    generatedTitle.innerText = state.title || '';
+                    articleBody.innerText = state.body || '';
+                    questionsList.innerHTML = '';
+                    if (state.questions && state.questions.length > 0) {
+                        state.questions.forEach(q => {
+                            const row = document.createElement('div');
+                            row.className = "flex items-start gap-3 bg-theme-card border border-theme p-3 rounded-lg";
+                            row.innerHTML = '<span class="text-accent font-extrabold text-sm select-none">?</span><p class="text-sm text-theme-primary leading-normal"></p>';
+                            row.querySelector('p').innerText = q;
+                            questionsList.appendChild(row);
+                        });
+                        questionsCard.classList.remove('hidden');
+                    } else {
+                        questionsCard.classList.add('hidden');
+                    }
+                    resultWorkspace.classList.remove('hidden');
+                    statusMsg.textContent = t('generated');
+                    statusMsg.dataset.i18n = 'generated';
+                }
+            } catch (e) { /* ignore corrupted state */ }
+        }
+
+        // TTS (Text-to-Speech)
+        let speaking = false;
+        const playBtn = document.getElementById('playBtn');
+
+        function stopTTS() {
+            try {
+                if (window.speechSynthesis) speechSynthesis.cancel();
+            } catch (e) { console.error('stopTTS error:', e); }
+            speaking = false;
+            playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play');
+            lucide.createIcons();
+        }
+
+        function speakText(text) {
+            if (!window.speechSynthesis) {
+                alert('TTS not supported in this browser.');
+                return;
+            }
+            try {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
+                utterance.rate = 0.9;
+                const voices = speechSynthesis.getVoices();
+                if (voices.length) {
+                    utterance.voice = voices.find(v => v.lang.startsWith(currentLang)) || voices[0];
+                }
+                utterance.onstart = () => {
+                    speaking = true;
+                    playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
+                    lucide.createIcons();
+                };
+                utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                utterance.onerror = (e) => { console.error('TTS error:', e.error); speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.error('speakText error:', e);
+                alert('TTS failed: ' + e.message);
+            }
+        }
+
+        playBtn.addEventListener('click', () => {
+            const text = articleBody.innerText;
+            if (!text) return;
+            if (speaking) { stopTTS(); return; }
+            speakText(text);
+        });
+
+        if (!window.speechSynthesis) {
+            playBtn.disabled = true;
+            playBtn.title = 'TTS not supported in this browser';
+        } else {
+            speechSynthesis.getVoices();
+            speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices(), { once: true });
+        }
+        restoreArticleState();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
