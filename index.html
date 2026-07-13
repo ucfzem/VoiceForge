@@ -746,35 +746,50 @@
         const playBtn = document.getElementById('playBtn');
 
         function stopTTS() {
-            try { speechSynthesis.cancel(); } catch(e) {}
+            try {
+                if (window.speechSynthesis) speechSynthesis.cancel();
+            } catch (e) { console.error('stopTTS error:', e); }
             speaking = false;
             playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play');
             lucide.createIcons();
         }
 
         function speakText(text) {
+            if (!window.speechSynthesis) {
+                alert('TTS not supported in this browser.');
+                return;
+            }
             const doSpeak = () => {
                 try {
                     speechSynthesis.cancel();
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = RECOGNITION_LOCALE[currentLang] || 'en-US';
                     utterance.rate = 0.9;
-                    try { utterance.voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(currentLang)) || null; } catch(e) {}
+                    const voices = speechSynthesis.getVoices();
+                    if (voices.length) {
+                        utterance.voice = voices.find(v => v.lang.startsWith(currentLang)) || voices[0];
+                    }
                     utterance.onstart = () => {
                         speaking = true;
                         playBtn.innerHTML = '<i data-lucide="square" class="w-3 h-3"></i> ' + t('stop');
                         lucide.createIcons();
                     };
                     utterance.onend = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
-                    utterance.onerror = () => { speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
+                    utterance.onerror = (e) => { console.error('TTS error:', e); speaking = false; playBtn.innerHTML = '<i data-lucide="play" class="w-3 h-3"></i> ' + t('play'); lucide.createIcons(); };
                     speechSynthesis.speak(utterance);
-                } catch(e) {}
+                } catch (e) {
+                    console.error('speakText error:', e);
+                    alert('TTS failed: ' + e.message);
+                }
             };
-            if (!speechSynthesis || speechSynthesis.getVoices().length === 0) {
-                const fallback = setTimeout(doSpeak, 500);
-                speechSynthesis.addEventListener('voiceschanged', () => { clearTimeout(fallback); doSpeak(); }, { once: true });
-            } else {
-                doSpeak();
+            try {
+                if (speechSynthesis.getVoices().length === 0) {
+                    speechSynthesis.onvoiceschanged = doSpeak;
+                } else {
+                    doSpeak();
+                }
+            } catch (e) {
+                console.error('speakText outer error:', e);
             }
         }
 
