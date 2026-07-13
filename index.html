@@ -444,7 +444,11 @@
         themeToggle.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
         langSelect.addEventListener('change', () => { setLang(langSelect.value); stopTTS(); });
         const savedKey = localStorage.getItem('voiceforge_groq_key');
-        if (savedKey) groqKeyInput.value = savedKey;
+        if (savedKey) {
+            groqKeyInput.value = savedKey;
+            keySavedMsg.classList.remove('hidden');
+            setTimeout(() => keySavedMsg.classList.add('hidden'), 3000);
+        }
         function saveKey() {
             const key = groqKeyInput.value.trim();
             if (key.startsWith('gsk_')) {
@@ -615,6 +619,7 @@
                     questionsCard.classList.add('hidden');
                 }
                 resultWorkspace.classList.remove('hidden');
+                saveArticleState();
                 statusMsg.textContent = t('generated');
                 statusMsg.dataset.i18n = 'generated';
             } catch (err) {
@@ -666,9 +671,49 @@
             questionsList.innerHTML = '';
             questionsCard.classList.add('hidden');
             transcriptPreview.classList.add('hidden');
+            localStorage.removeItem('voiceforge_article');
             statusMsg.textContent = t('cleared');
             statusMsg.dataset.i18n = 'cleared';
         });
+
+        // Persist generated article
+        function saveArticleState() {
+            const state = {
+                title: generatedTitle.innerText,
+                body: articleBody.innerText,
+                questions: [],
+                lang: currentLang
+            };
+            document.querySelectorAll('#questionsList p').forEach(p => state.questions.push(p.innerText));
+            localStorage.setItem('voiceforge_article', JSON.stringify(state));
+        }
+        function restoreArticleState() {
+            const raw = localStorage.getItem('voiceforge_article');
+            if (!raw) return;
+            try {
+                const state = JSON.parse(raw);
+                if (state.title || state.body) {
+                    generatedTitle.innerText = state.title || '';
+                    articleBody.innerText = state.body || '';
+                    questionsList.innerHTML = '';
+                    if (state.questions && state.questions.length > 0) {
+                        state.questions.forEach(q => {
+                            const row = document.createElement('div');
+                            row.className = "flex items-start gap-3 bg-theme-card border border-theme p-3 rounded-lg";
+                            row.innerHTML = '<span class="text-accent font-extrabold text-sm select-none">?</span><p class="text-sm text-theme-primary leading-normal"></p>';
+                            row.querySelector('p').innerText = q;
+                            questionsList.appendChild(row);
+                        });
+                        questionsCard.classList.remove('hidden');
+                    } else {
+                        questionsCard.classList.add('hidden');
+                    }
+                    resultWorkspace.classList.remove('hidden');
+                    statusMsg.textContent = t('generated');
+                    statusMsg.dataset.i18n = 'generated';
+                }
+            } catch (e) { /* ignore corrupted state */ }
+        }
 
         // TTS (Text-to-Speech)
         let speaking = false;
@@ -710,6 +755,7 @@
             speechSynthesis.getVoices();
             speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices(), { once: true });
         }
+        restoreArticleState();
         lucide.createIcons();
     </script>
 </body>
